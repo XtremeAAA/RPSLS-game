@@ -7,10 +7,12 @@
 const char* get_gesture_name(int gesture) {
     switch (gesture) {
         case 0: return "rock";
-        case 1: return "paper";
+        case 1: return "fire";
         case 2: return "scissors";
-        case 3: return "lizard";
-        case 4: return "spock";
+        case 3: return "sponge";
+        case 4: return "paper";
+        case 5: return "air";
+        case 6: return "water";
         default: return "invalid";
     }
 }
@@ -18,24 +20,21 @@ const char* get_gesture_name(int gesture) {
 // Function to determine winner
 // Returns 1 if first player wins, 0 for tie, -1 if second player wins
 int determine_winner(int player1, int player2) {
+    int N = 7; // Number of gestures
+    int k = N / 2; // Number of gestures each beats
+
     if (player1 == player2) return 0; // Tie
-    
-    if ((player1 == 0 && (player2 == 2 || player2 == 3)) || // Rock crushes Scissors/Lizard
-        (player1 == 1 && (player2 == 0 || player2 == 4)) || // Paper covers Rock / disproves Spock
-        (player1 == 2 && (player2 == 1 || player2 == 3)) || // Scissors cuts Paper / decapitates Lizard
-        (player1 == 3 && (player2 == 1 || player2 == 4)) || // Lizard eats Paper / poisons Spock
-        (player1 == 4 && (player2 == 0 || player2 == 2)))   // Spock vaporizes Rock / smashes Scissors
-        return 1; // Player 1 wins
-    
-    return -1; // Player 2 wins
+    return ((player2 - player1 + N) % N <= k) ? 1 : -1;
 }
 
 // Function to get input from human player
 int get_human_choice() {
     int choice;
-    printf("Enter your gesture (0=rock, 1=paper, 2=scissors, 3=lizard, 4=spock or type -1 to exit): ");
-    while (scanf("%d", &choice) != 1 || (choice < -1 || choice > 4)) {
-        printf("Invalid input! Please enter a number between 0 and 4 or -1 to exit: ");
+    printf("Enter your gesture:\n");
+    printf("0 = rock\n1 = fire\n2 = scissors\n3 = sponge\n4 = paper\n5 = air\n6 = water\n");
+    printf("(or type -1 to exit): ");
+    while (scanf("%d", &choice) != 1 || (choice < -1 || choice > 6)) {
+        printf("Invalid input! Please enter a number between 0 and 6 or -1 to exit: ");
         while (getchar() != '\n'); // Clear input buffer
     }
     return choice;
@@ -48,9 +47,7 @@ int main() {
 
     // Game mode selection
     printf("Select game mode:\n");
-    printf("1 - Human vs Human\n");
-    printf("2 - Human vs Computer\n");
-    printf("3 - Computer vs Computer\n");
+    printf("1 - Human vs Human\n2 - Human vs Computer\n3 - Computer vs Computer\n");
     printf("Enter choice (or type -1 to exit): ");
     while (scanf("%d", &mode) != 1 || (mode < -1 || mode > 3)) {
         printf("Invalid choice! Please enter 1, 2, or 3, or -1 to exit: ");
@@ -76,12 +73,12 @@ int main() {
             printf("Human: ");
             player1 = get_human_choice();
             if (player1 == -1) break;
-            player2 = rand() % 5; // Computer choice
+            player2 = rand() % 7; // Computer choice
             printf("Computer chose: %s\n", get_gesture_name(player2));
         } else { // Computer vs Computer
             printf("----------------------------------\n");
-            player1 = rand() % 5;
-            player2 = rand() % 5;
+            player1 = rand() % 7;
+            player2 = rand() % 7;
             printf("Computer 1 chose: %s\n", get_gesture_name(player1));
             printf("Computer 2 chose: %s\n", get_gesture_name(player2));
         }
@@ -99,17 +96,6 @@ int main() {
             score2++;
         }
         printf("Score: %s - %d | %s - %d\n", (mode == 3) ? "Computer 1" : (mode == 2) ? "Human" : "Human 1", score1, (mode == 3) ? "Computer 2" : (mode == 2) ? "Computer" : "Human 2", score2);
-        
-        // If in computer mode, wait for user input to continue or exit
-        if (mode == 3) {
-            printf("Type 'cont' to continue or 'exit' to quit: ");
-            char cont[10];
-            while (scanf("%s", cont) != 1 || (strcmp(cont, "cont") != 0 && strcmp(cont, "exit") != 0)) {
-                printf("Invalid input! Type 'cont' to continue or 'exit' to quit: ");
-                while (getchar() != '\n'); // Clear input buffer
-            }
-            if (strcmp(cont, "exit") == 0) break;
-        }
     }
     
     // Declare final winner if not exited early
