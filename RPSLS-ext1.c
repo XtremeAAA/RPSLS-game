@@ -37,20 +37,20 @@ int determine_winner(int player1, int player2) {
 // Function to get input from human player
 int get_human_choice() {
     int choice;
+    char buffer[100]; // Buffer for input validation
     printf("Enter your gesture:\n");
-    printf("0 = rock\n");
-    printf("1 = fire\n");
-    printf("2 = scissors\n");
-    printf("3 = sponge\n");
-    printf("4 = paper\n");
-    printf("5 = air\n");
-    printf("6 = water\n");
-    printf("(or type -1 to exit): ");
-    while (scanf("%d", &choice) != 1 || (choice < -1 || choice > 6)) {
+    printf("0 = rock\n1 = fire\n2 = scissors\n3 = sponge\n4 = paper\n5 = air\n6 = water\n(or type -1 to exit): ");
+
+    while (1) {
+        if (!fgets(buffer, sizeof(buffer), stdin)) {
+            printf("Error reading input! Try again: ");
+            continue;
+        }
+        if (sscanf(buffer, "%d", &choice) == 1 && choice >= -1 && choice <= 6)
+            return choice;
+
         printf("Invalid input! Please enter a number between 0 and 6 or -1 to exit: ");
-        while (getchar() != '\n'); // Clear input buffer
     }
-    return choice;
 }
 
 int main() {
@@ -60,14 +60,21 @@ int main() {
 
     // Game mode selection
     printf("Select game mode:\n");
-    printf("1 - Human vs Human\n");
-    printf("2 - Human vs Computer\n");
-    printf("3 - Computer vs Computer\n");
+    printf("1 - Human vs Human\n2 - Human vs Computer\n3 - Computer vs Computer\n");
     printf("Enter choice (or type -1 to exit): ");
-    while (scanf("%d", &mode) != 1 || (mode < -1 || mode > 3)) {
+
+    while (1) {
+        char buffer[100];
+        if (!fgets(buffer, sizeof(buffer), stdin)) {
+            printf("Error reading input! Try again: ");
+            continue;
+        }
+        if (sscanf(buffer, "%d", &mode) == 1 && mode >= -1 && mode <= 3)
+            break;
+        
         printf("Invalid choice! Please enter 1, 2, or 3, or -1 to exit: ");
-        while (getchar() != '\n'); // Clear input buffer
     }
+
     if (mode == -1) {
         printf("Exiting game.\n");
         return 0;
@@ -79,15 +86,24 @@ int main() {
             printf("----------------------------------\n");
             printf("Human 1:\n");
             player1 = get_human_choice();
-            if (player1 == -1) break;
-            printf("Human 2: \n");
+            if (player1 == -1) {
+                printf("Game exited early.\n");
+                return 0;
+            }
+            printf("Human 2:\n");
             player2 = get_human_choice();
-            if (player2 == -1) break;
+            if (player2 == -1) {
+                printf("Game exited early.\n");
+                return 0;
+            }
         } else if (mode == 2) { // Human vs Computer
             printf("----------------------------------\n");
-            printf("Human: \n");
+            printf("Human:\n");
             player1 = get_human_choice();
-            if (player1 == -1) break;
+            if (player1 == -1) {
+                printf("Game exited early.\n");
+                return 0;
+            }
             player2 = rand() % 7; // Computer choice
             printf("Computer chose: %s\n", get_gesture_name(player2));
         } else { // Computer vs Computer
@@ -110,16 +126,17 @@ int main() {
             printf("%s wins this round!\n", (mode == 3) ? "Computer 2" : (mode == 2) ? "Computer" : "Human 2");
             score2++;
         }
-        printf("Score: %s - %d | %s - %d\n", (mode == 3) ? "Computer 1" : (mode == 2) ? "Human" : "Human 1", score1, (mode == 3) ? "Computer 2" : (mode == 2) ? "Computer" : "Human 2", score2);
+        printf("Score: %s - %d | %s - %d\n", (mode == 3) ? "Computer 1" : (mode == 2) ? "Human" : "Human 1", 
+               score1, 
+               (mode == 3) ? "Computer 2" : (mode == 2) ? "Computer" : "Human 2", 
+               score2);
     }
     
     // Declare final winner if not exited early
     if (score1 == 4)
         printf("%s wins the game!\n", (mode == 3) ? "Computer 1" : (mode == 2) ? "Human" : "Human 1");
-    else if (score2 == 4)
-        printf("%s wins the game!\n", (mode == 3) ? "Computer 2" : (mode == 2) ? "Computer" : "Human 2");
     else
-        printf("Game exited before completion.\n");
+        printf("%s wins the game!\n", (mode == 3) ? "Computer 2" : (mode == 2) ? "Computer" : "Human 2");
     
     return 0;
 }
