@@ -13,25 +13,22 @@ const char* get_gesture_name(int gesture) {
         case 4: return "paper";
         case 5: return "air";
         case 6: return "water";
+        case 7: return "test";
         default: return "invalid";
     }
 }
 
-// Function to determine winner
-// Returns 1 if first player wins, 0 for tie, -1 if second player wins
-int determine_winner(int player1, int player2) {
-    if (player1 == player2) return 0; // Tie
-    
-    if ((player1 == 0 && (player2 == 1 || player2 == 2 || player2 == 3)) || // Rock > Fire, Scissors, Sponge
-        (player1 == 1 && (player2 == 2 || player2 == 4 || player2 == 3)) || // Fire > Scissors, Paper, Sponge
-        (player1 == 2 && (player2 == 4 || player2 == 3 || player2 == 5)) || // Scissors > Paper, Sponge, Air
-        (player1 == 3 && (player2 == 4 || player2 == 5 || player2 == 6)) || // Sponge > Paper, Air, Water
-        (player1 == 4 && (player2 == 0 || player2 == 5 || player2 == 6)) || // Paper > Rock, Air, Water
-        (player1 == 5 && (player2 == 1 || player2 == 0 || player2 == 6)) || // Air > Fire, Rock, Water
-        (player1 == 6 && (player2 == 0 || player2 == 1 || player2 == 2)))   // Water > Rock, Fire, Scissors
+// Function to determine the winner using modular arithmetic
+// Returns 1 if player1 wins, 0 for tie, -1 if player2 wins
+int determine_winner(int player1, int player2, int num_gestures) {
+    int result = (player1 - player2 + num_gestures) % num_gestures;
+    if (result == 0) {
+        return 0; // Tie
+    } else if (result <= num_gestures / 2) {
         return 1; // Player 1 wins
-    
-    return -1; // Player 2 wins
+    } else {
+        return -1; // Player 2 wins
+    }
 }
 
 // Function to get input from human player
@@ -42,7 +39,7 @@ int get_human_choice() {
     printf("(or type -1 to exit): ");
     
     while (1) {
-        if (scanf("%d", &choice) == 1 && (choice >= -1 && choice <= 6)) {
+        if (scanf("%d", &choice) == 1 && (choice >= -1 && choice <= 7)) {
             return choice;
         } else {
             printf("Invalid input! Enter a number between 0 and 6 or -1 to exit: ");
@@ -54,6 +51,7 @@ int get_human_choice() {
 int main() {
     int mode, player1, player2, winner;
     int score1 = 0, score2 = 0;
+    const int num_gestures = 7; // Number of gestures (can be increased)
     srand(time(NULL));
 
     // Game mode selection
@@ -86,17 +84,17 @@ int main() {
             printf("Human: ");
             player1 = get_human_choice();
             if (player1 == -1) break;
-            player2 = rand() % 7; // Computer choice
+            player2 = rand() % num_gestures; // Computer choice
             printf("Computer chose: %s\n", get_gesture_name(player2));
         } else { // Computer vs Computer
-            player1 = rand() % 7;
-            player2 = rand() % 7;
+            player1 = rand() % num_gestures;
+            player2 = rand() % num_gestures;
             printf("Computer 1 chose: %s\n", get_gesture_name(player1));
             printf("Computer 2 chose: %s\n", get_gesture_name(player2));
         }
 
         // Determine winner
-        winner = determine_winner(player1, player2);
+        winner = determine_winner(player1, player2, num_gestures); // Pass the total number of gestures
         printf("\n%s vs %s\n", get_gesture_name(player1), get_gesture_name(player2));
         
         if (winner == 1) {
