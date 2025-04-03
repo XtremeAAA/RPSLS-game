@@ -13,23 +13,27 @@ const char* get_gesture_name(int gesture) {
         case 4: return "paper";
         case 5: return "air";
         case 6: return "water";
-        case 7: return "test";
         default: return "invalid";
     }
 }
 
 // Function to determine the winner using modular arithmetic
 // Returns 1 if player1 wins, 0 for tie, -1 if player2 wins
-int determine_winner(int player1, int player2, int num_gestures) {
-    int result = (player1 - player2 + num_gestures) % num_gestures;
-    if (result == 0) {
-        return 0; // Tie
-    } else if (result <= num_gestures / 2) {
-        return 1; // Player 1 wins
-    } else {
-        return -1; // Player 2 wins
-    }
+// Recursive function to determine the winner
+int determine_winner_recursive(int player1, int player2, int num_gestures, int step) {
+    // Base case: if both players chose the same gesture, it's a tie
+    if (player1 == player2) return 0;
+
+    // Recursive case: simulate checking the win condition step by step
+    if (step == num_gestures / 2) return -1; // If we reach the halfway mark, player2 wins
+
+    // If player1 beats player2 in this step, return 1 (player1 wins)
+    if ((player1 - player2 + num_gestures) % num_gestures == step) return 1;
+
+    // Recursively check the next step
+    return determine_winner_recursive(player1, player2, num_gestures, step + 1);
 }
+
 
 // Function to get input from human player
 int get_human_choice() {
@@ -94,7 +98,7 @@ int main() {
         }
 
         // Determine winner
-        winner = determine_winner(player1, player2, num_gestures); // Pass the total number of gestures
+        winner = determine_winner_recursive(player1, player2, num_gestures, 0); // Pass the total number of gestures
         printf("\n%s vs %s\n", get_gesture_name(player1), get_gesture_name(player2));
         
         if (winner == 1) {
